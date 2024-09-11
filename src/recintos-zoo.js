@@ -10,9 +10,9 @@ class RecintosZoo {
             hipopotamo:{tamanho: 4, bioma:['savana', 'floresta']}
         }
 
-        this.recintos = {
+        this.recintos = [
             
-        }
+        ]
         
     }
     
