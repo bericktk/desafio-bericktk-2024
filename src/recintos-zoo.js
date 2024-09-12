@@ -1,5 +1,6 @@
 class RecintosZoo {
 
+    // Usando o metodo construtor para criar o objeto animais e a lista de objetos com os recintos!
     constructor() {
         this.animais = {
             LEAO:{tamanho: 3, bioma: 'savana'},
@@ -15,12 +16,12 @@ class RecintosZoo {
             {Recinto: 2, bioma: 'floresta', tamanho: 5, animais:[]},
             {Recinto: 3, bioma:['savana', 'rio'], tamanho: 7, animais:['gazela']},
             {Recinto: 4, bioma: 'rio', tamanho: 8, animais:[]},
-            {Recinto: 5, bioma: 'savana', tamanho: 9, animais: ['leão']},
+            {Recinto: 5, bioma: 'savana', tamanho: 9, animais: ['leão']}
         ]
         
     }
     
-
+    // Criando a função analisaRecintos para verificar se os animais cabem no recinto indicado no desafio!
     analisaRecintos(animal, quantidade) {
         const animalKey = animal.toUpperCase()
         if(!this.animais.hasOwnProperty(animalKey)){
@@ -33,6 +34,8 @@ class RecintosZoo {
 
         const animalData = this.animais[animalKey]
         const recintosViaveis = this.recintos
+        
+        // Filtrando os recintos e verificando se os animais cabem no mesmo!
         .filter(recinto => {
             const espacoNecessario = animalData.tamanho * quantidade
             const espacoLivre = recinto.tamanho - recinto.animais.length
@@ -43,16 +46,19 @@ class RecintosZoo {
             return biomaEhCompativel && espacoLivre >= espacoNecessario
         })
         
+        // Verificando qual dos espaços é maior para colocar o animal indicado!
         .sort((a, b) => {
             const espacoLivreA = a.tamanho - a.animais.length
             const espacoLivreB = b.tamanho - b.animais.length
             return espacoLivreB - espacoLivreA
         })
 
+        // Verifica se há recintos disponiveis!
         if (recintosViaveis.length === 0) {
             return { erro: "Não há recinto viável", recintosViaveis: false }
         }
 
+        // Fazendo o calculo para subtrair os espaços quando o animal estiver no recinto!
         const melhorRecinto = recintosViaveis[0]
         const espacoLivreAtual = melhorRecinto.tamanho - melhorRecinto.animais.length
         const espacoNecessario = animalData.tamanho * quantidade
