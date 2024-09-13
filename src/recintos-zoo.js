@@ -1,79 +1,84 @@
 class RecintosZoo {
-
-    // Usando o metodo construtor para criar o objeto animais e a lista de objetos com os recintos!
     constructor() {
         this.animais = {
-            LEAO:{tamanho: 3, bioma: 'savana'},
-            LEOPARDO:{tamanho: 2, bioma:'savana'},
-            CROCODILO:{tamanho: 3, bioma:'rio'},
-            MACACO:{tamanho: 1, bioma:['savana', 'floresta']},
-            GAZELA:{tamanho: 2, bioma:'savana'},
-            HIPOPOTAMO:{tamanho: 4, bioma:['savana', 'rio']}
+            LEAO: { tamanho: 3, bioma: 'savana', carnivoro: true },
+            LEOPARDO: { tamanho: 2, bioma: 'savana', carnivoro: true },
+            CROCODILO: { tamanho: 3, bioma: 'rio', carnivoro: true },
+            MACACO: { tamanho: 1, bioma: ['savana', 'floresta'], carnivoro: false },
+            GAZELA: { tamanho: 2, bioma: 'savana', carnivoro: false },
+            HIPOPOTAMO: { tamanho: 4, bioma: ['savana', 'rio'], carnivoro: false }
         }
-
+  
         this.recintos = [
-            {Recinto: 1, bioma: 'savana', tamanho: 10, animais: ['macaco', 'macaco', 'macaco']},
-            {Recinto: 2, bioma: 'floresta', tamanho: 5, animais:[]},
-            {Recinto: 3, bioma:['savana', 'rio'], tamanho: 7, animais:['gazela']},
-            {Recinto: 4, bioma: 'rio', tamanho: 8, animais:[]},
-            {Recinto: 5, bioma: 'savana', tamanho: 9, animais: ['leão']}
+            { Recinto: 1, bioma: 'savana', tamanho: 10, animais: ['MACACO', 'MACACO', 'MACACO'] },
+            { Recinto: 2, bioma: 'floresta', tamanho: 5, animais: [] },
+            { Recinto: 3, bioma: ['savana', 'rio'], tamanho: 7, animais: ['GAZELA'] },
+            { Recinto: 4, bioma: 'rio', tamanho: 8, animais: [] },
+            { Recinto: 5, bioma: 'savana', tamanho: 9, animais: ['LEAO'] }
         ]
-        
     }
-    
-    // Criando a função analisaRecintos para verificar se os animais cabem no recinto indicado no desafio!
+  
     analisaRecintos(animal, quantidade) {
         const animalKey = animal.toUpperCase()
-        if(!this.animais.hasOwnProperty(animalKey)){
-            return { erro: "Animal inválido"}
+        if (!this.animais.hasOwnProperty(animalKey)) {
+            return { erro: "Animal inválido" }
         }
-
-        if(quantidade <= 0) {
-            return {erro: "Quantidade inválida"}
+  
+        if (quantidade <= 0 || !Number.isInteger(quantidade)) {
+            return { erro: "Quantidade inválida" }
         }
-
+  
         const animalData = this.animais[animalKey]
         const recintosViaveis = this.recintos
-        
-        // Filtrando os recintos e verificando se os animais cabem no mesmo!
-        .filter(recinto => {
-            const espacoNecessario = animalData.tamanho * quantidade
-            const espacoLivre = recinto.tamanho - recinto.animais.length
-            const biomaEhCompativel = Array.isArray(recinto.bioma)
-                ? recinto.bioma.includes(animalData.bioma)
-                : recinto.bioma === animalData.bioma
-
-            return biomaEhCompativel && espacoLivre >= espacoNecessario
-        })
-        
-        // Verificando qual dos espaços é maior para colocar o animal indicado!
-        .sort((a, b) => {
-            const espacoLivreA = a.tamanho - a.animais.length
-            const espacoLivreB = b.tamanho - b.animais.length
-            return espacoLivreB - espacoLivreA
-        })
-
-        // Verifica se há recintos disponiveis!
+            .filter(recinto => this.verificaRecinto(recinto, animalKey, quantidade, animalData))
+            .map(recinto => {
+                const espacoOcupado = recinto.animais.reduce((total, a) => total + this.animais[a].tamanho, 0)
+                const espacoNecessario = animalData.tamanho * quantidade
+                const espacoExtra = recinto.animais.length > 0 && recinto.animais[0] !== animalKey ? 1 : 0
+                const espacoLivre = recinto.tamanho - espacoOcupado - espacoNecessario - espacoExtra
+                return {
+                    ...recinto,
+                    espacoLivre
+                };
+            })
+            .sort((a, b) => b.espacoLivre - a.espacoLivre)
+  
         if (recintosViaveis.length === 0) {
-            return { erro: "Não há recinto viável", recintosViaveis: false }
+            return { erro: "Não há recinto viável" }
         }
-
-        // Fazendo o calculo para subtrair os espaços quando o animal estiver no recinto!
-        const melhorRecinto = recintosViaveis[0]
-        const espacoLivreAtual = melhorRecinto.tamanho - melhorRecinto.animais.length
-        const espacoNecessario = animalData.tamanho * quantidade
-        const espacoLivreAposInsercao = espacoLivreAtual - espacoNecessario
-
-        for (let i = 0; i < quantidade; i++) {
-            melhorRecinto.animais.push(animalKey.toLowerCase())
-        }
-
+  
         return {
-            recintosViaveis: [`Recinto ${melhorRecinto.Recinto} (espaço livre: ${espacoLivreAposInsercao} total: ${melhorRecinto.tamanho})`],
-            erro: undefined
+            recintosViaveis: recintosViaveis.map(r => `Recinto ${r.Recinto} (espaço livre: ${r.espacoLivre} total: ${r.tamanho})`)
         }
     }
-
-}
-
-export { RecintosZoo as RecintosZoo };
+  
+    verificaRecinto(recinto, animalKey, quantidade, animalData) {
+        const espacoOcupado = recinto.animais.reduce((total, a) => total + this.animais[a].tamanho, 0)
+        const espacoNecessario = animalData.tamanho * quantidade;
+        const espacoExtra = recinto.animais.length > 0 && recinto.animais[0] !== animalKey ? 1 : 0
+        const espacoLivre = recinto.tamanho - espacoOcupado - espacoExtra;
+  
+      
+        if (espacoLivre < espacoNecessario) return false
+  
+     
+        const biomaCompativel = Array.isArray(animalData.bioma)
+            ? animalData.bioma.some(b => Array.isArray(recinto.bioma) ? recinto.bioma.includes(b) : recinto.bioma === b)
+            : Array.isArray(recinto.bioma) ? recinto.bioma.includes(animalData.bioma) : recinto.bioma === animalData.bioma
+        if (!biomaCompativel) return false
+  
+       
+        if (animalData.carnivoro && recinto.animais.length > 0 && recinto.animais[0] !== animalKey) return false
+        if (recinto.animais.length > 0 && this.animais[recinto.animais[0]].carnivoro && animalKey !== recinto.animais[0]) return false
+  
+     
+        if (animalKey === 'HIPOPOTAMO' && (!Array.isArray(recinto.bioma) || !recinto.bioma.includes('savana') || !recinto.bioma.includes('rio'))) return false
+  
+    
+        if (animalKey === 'MACACO' && recinto.animais.length === 0 && quantidade === 1) return false
+  
+        return true
+    }
+  }
+  
+  export { RecintosZoo as RecintosZoo }
